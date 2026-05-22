@@ -13,25 +13,27 @@ class AuthController extends Controller
 {
     public function register(Request $request): JsonResponse
     {
-        $validated = $request->validate([
+        $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
         $user = User::create([
-            'name'     => $validated['name'],
-            'email'    => $validated['email'],
-            'password' => Hash::make($validated['password']),
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message'      => 'Registrasi berhasil',
-            'user'         => $user,
-            'access_token' => $token,
-            'token_type'   => 'Bearer',
+            'success' => true,
+            'message' => 'Registrasi berhasil',
+            'data'    => [
+                'user'  => $user,
+                'token' => $token,
+            ],
         ], 201);
     }
 
@@ -48,14 +50,16 @@ class AuthController extends Controller
             ]);
         }
 
-        $user = Auth::user();
+        $user  = Auth::user();
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message'      => 'Login berhasil',
-            'user'         => $user,
-            'access_token' => $token,
-            'token_type'   => 'Bearer',
+            'success' => true,
+            'message' => 'Login berhasil',
+            'data'    => [
+                'user'  => $user,
+                'token' => $token,
+            ],
         ]);
     }
 
@@ -64,12 +68,17 @@ class AuthController extends Controller
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
+            'success' => true,
             'message' => 'Logout berhasil',
         ]);
     }
 
-    public function me(Request $request): JsonResponse
+    public function profile(Request $request): JsonResponse
     {
-        return response()->json($request->user());
+        return response()->json([
+            'success' => true,
+            'message' => 'Data profil berhasil diambil',
+            'data'    => $request->user(),
+        ]);
     }
 }

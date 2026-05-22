@@ -46,6 +46,7 @@ class OrderController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
+            'notes'                => 'nullable|string',
             'items'                => 'required|array|min:1',
             'items.*.product_id'   => 'required|exists:products,id',
             'items.*.quantity'     => 'required|integer|min:1',
@@ -93,8 +94,7 @@ class OrderController extends Controller
                 $orderItems[] = [
                     'product_id' => $product->id,
                     'quantity'   => $item['quantity'],
-                    'price'      => $product->price,
-                    'subtotal'   => $subtotal,
+                    'unit_price' => $product->price,
                 ];
 
                 // Kurangi stok produk
@@ -106,6 +106,7 @@ class OrderController extends Controller
                 'user_id'     => $request->user()->id,
                 'total_price' => $totalPrice,
                 'status'      => 'pending',
+                'notes'       => $request->notes,
             ]);
 
             // Buat order items
@@ -169,7 +170,7 @@ class OrderController extends Controller
     public function updateStatus(Request $request, string $id): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'status' => 'required|string|in:pending,processing,shipped,delivered,cancelled',
+            'status' => 'required|string|in:pending,processing,done,cancelled',
         ]);
 
         if ($validator->fails()) {
