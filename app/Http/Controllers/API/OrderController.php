@@ -92,10 +92,11 @@ class OrderController extends Controller
                 $totalPrice  += $subtotal;
 
                 $orderItems[] = [
-                    'product_id' => $product->id,
-                    'quantity'   => $item['quantity'],
-                    'unit_price' => $product->price,
-                ];
+                'product_id' => $product->id,
+                'quantity'   => $item['quantity'],
+                'price'      => $product->price,
+                'subtotal'   => $subtotal,
+            ];
 
                 // Kurangi stok produk
                 $product->decrement('stock', $item['quantity']);
@@ -123,14 +124,17 @@ class OrderController extends Controller
                 'data'    => $order->load('items.product'),
             ], 201);
 
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat membuat pesanan',
-                'error'   => $e->getMessage(),
-            ], 500);
-        }
+        }catch (\Exception $e) {
+    DB::rollBack();
+
+    return response()->json([
+        'success' => false,
+        'message' => 'Terjadi kesalahan saat membuat pesanan',
+        'error'   => $e->getMessage(),
+        'line'    => $e->getLine(),
+        'file'    => $e->getFile(),
+    ], 500);
+}
     }
 
     /**
