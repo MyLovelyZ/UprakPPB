@@ -20,11 +20,11 @@ class Order extends Model
     ];
 
     protected function casts(): array
-    {
-        return [
-            'total_price' => 'decimal',
-        ];
-    }
+{
+    return [
+        'total_price' => 'decimal:2',
+    ];
+}
 
     // bagian relasi lagi ygy
 
